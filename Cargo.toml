@@ -1,0 +1,48 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+# core web features
+rocket = { git = "https://github.com/SergioBenitez/Rocket.git", features = ["tls", "json", "secrets"], rev = "677790d6397147f83066a284ee962bc174c555b5" }
+diesel = { version = "1.3", features = ["postgres", "sqlite", "r2d2", "numeric"] }
+tokio-diesel = "0.3.0"
+reqwest = { version = "0.11", features = ["json"] } 
+
+# payments path="../async-stripe-0.13.0-rc3"
+async-stripe = { git="https://github.com/null-black/async-stripe", version = "0.13.0", features = ["runtime-tokio-hyper", "webhook-events"] }
+#async-stripe = { path="../async-stripe", features = ["runtime-tokio-hyper", "webhook-events"] }
+
+# JSON
+serde_derive = "1.0" 
+serde = { version = "1.0", features = ["derive"] } 
+serde_json = "1.0"
+
+# encoding and decoding
+data-encoding = "2.3.2"
+urlencoding = "2"
+
+# validation
+regex = "1"
+
+# auth
+chacha20poly1305 = "0.8" # audited by some sort of firm, used by passCS for generating emailed tokens
+hmac = "0.11.0"
+sha2  = "0.9.8"
+
+# mail related
+askama = "0.8"
+lettre = "0.10.0-rc.3"
+
+# other
+lazy_static = "1.4"
+rand = "0.8"
+chrono = { version = "0.4", features = ["alloc", "std", "clock", "serde"] }
+chrono-tz = "0.6"
+
+# rust convenience
+derive_more = "0.99.0"

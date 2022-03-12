@@ -1,0 +1,7 @@
+[sqfluff]
+dialect = postgres
+
+[sqlfluff:rules]
+tab_space_size = 4
+indent_unit = tab
+max_line_length = 180

@@ -3,9 +3,6 @@ use crate::schema;
 use crate::establish_connection;
 use diesel::{expression::NonAggregate, prelude::*, deserialize::FromSql, serialize::ToSql};
 
-use diesel::RunQueryDsl;
-use diesel::result::Error as DieselError;
-
 pub trait HasId: Sized + Clone + Send + Sync + std::fmt::Debug {
     fn get_id(&self) -> i32;
 }

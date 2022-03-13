@@ -64,8 +64,8 @@ pub enum Table {
 
 #[derive(Debug, Serialize, Deserialize, Insertable, Queryable)]
 pub struct Node {
-    device_id: i64,
-    hits: i32,
-    last_hit_at_epoch: i64,
-    connected: bool
+    pub device_id: i64,
+    pub hits: i32,
+    pub last_hit_at_epoch: i64,
+    pub connected: bool
 }

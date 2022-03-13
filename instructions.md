@@ -1,6 +1,6 @@
-diesel migration run --database-url=postgres://localhost/postgres
+diesel migration run --database-url=postgres://localhost/impactaware
 
-You may need to do postgres://username:password@localhost/postgres
+You may need to do postgres://username:password@localhost/impactaware
 
 If you are using a URL other than the example one I provided on the first line of this file, please edit the string in src/lib.rs in the function "establish\_connection"
 

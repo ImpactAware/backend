@@ -88,16 +88,58 @@ fn process_command(command: Command) {
     let conn = establish_connection();
     match command {
         Vibration { device_id, count } => {
-            match nodesdsl::nodes.find(device_id as i64).get_result::<Node>(&conn) {
+            match diesel::update(nodesdsl::nodes.find(device_id as i64)).set((nodesdsl::hits.eq(count as i32), nodesdsl::last_hit_at_epoch.eq(Utc::now().timestamp()), nodesdsl::connected.eq(true))).get_result::<Node>(&conn) {
                 Ok(node) => {
+                    println!("update node {:?}", node);
+                },
+                Err(diesel::result::Error::NotFound) => {
+                    let _ = diesel::insert_into(backend::schema::nodes::table).values(Node {
+                        device_id: device_id as i64,
+                        hits: count as i32,
+                        last_hit_at_epoch: Utc::now().timestamp(),
+                        connected: true
+                    }).get_result::<models::Node>(&conn);
                 },
                 Err(e) => {
+                    println!("DB Error, did a node send a vibration without ever sending a connect. Error: {:?}",e);
                 }
             }
         },
         Connection { device_id } => {
+            match diesel::update(nodesdsl::nodes.find(device_id as i64)).set(nodesdsl::connected.eq(true)).get_result::<Node>(&conn) {
+                Ok(node) => {
+                    println!("update node {:?}", node);
+                },
+                Err(diesel::result::Error::NotFound) => {
+                    let _ = diesel::insert_into(backend::schema::nodes::table).values(Node {
+                        device_id: device_id as i64,
+                        hits: 0,
+                        last_hit_at_epoch: Utc::now().timestamp(),
+                        connected: true
+                    }).get_result::<models::Node>(&conn);
+                },
+                Err(e) => {
+                    println!("DB Error, did a node send a vibration without ever sending a connect. Error: {:?}",e);
+                }
+            }
         },
         Disconnection { device_id } => {
+            match diesel::update(nodesdsl::nodes.find(device_id as i64)).set(nodesdsl::connected.eq(false)).get_result::<Node>(&conn) {
+                Ok(node) => {
+                    println!("update node {:?}", node);
+                },
+                Err(diesel::result::Error::NotFound) => {
+                    let _ = diesel::insert_into(backend::schema::nodes::table).values(Node {
+                        device_id: device_id as i64,
+                        hits: 0,
+                        last_hit_at_epoch: Utc::now().timestamp(),
+                        connected: false
+                    }).get_result::<models::Node>(&conn);
+                },
+                Err(e) => {
+                    println!("DB Error, did a node send a vibration without ever sending a connect. Error: {:?}",e);
+                }
+            }
         }
     }
 }
@@ -126,7 +168,7 @@ fn main() {
                     }
                 }
             },
-            Err(e) => {
+            Err(_) => {
                 let mut serial_buf: Vec<u8> = vec![0; 64];
 
                 let mut end = 64;
@@ -154,8 +196,3 @@ fn main() {
 
     
 }
-// leave the running buffer alone
-/*port.read(serial_buf.as_mut_slice()).expect("Found no data!");
-let read_str = String::from_utf8(serial_buf.clone()).expect("Should get utf8 string from buffer");
-running_buffer.push_str(&read_str);
-*/

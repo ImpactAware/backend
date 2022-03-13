@@ -39,9 +39,8 @@ pub use derive_more::Display;
 pub use chrono::Utc;
 
 pub fn establish_connection() -> PgConnection {
-        PgConnection::establish(&env::var("DB_URL").expect("No DB URL Set")).expect(&format!("Error connecting to database"))
+        PgConnection::establish("postgres://localhost/impactaware").expect(&format!("Error connecting to database"))
 }
-
 
 #[derive(Serialize, Debug)]
 pub struct ApiError<E: Sized + Error + Serialize + Into<Status>> {

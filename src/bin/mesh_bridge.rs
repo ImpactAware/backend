@@ -1,6 +1,8 @@
 extern crate serialport;
 extern crate nom;
 use std::time::Duration;
+use backend::*;
+use backend::models::*;
 
 use nom::{
   IResult,
@@ -81,6 +83,24 @@ fn parse_command(buffer: &str) -> IResult<&str, Command> {
     alt((vibration_parser, disconnect_parser, connect_parser))(buffer)
 }
 
+fn process_command(command: Command) {
+    use Command::*;
+    let conn = establish_connection();
+    match command {
+        Vibration { device_id, count } => {
+            match nodesdsl::nodes.find(device_id as i64).get_result::<Node>(&conn) {
+                Ok(node) => {
+                },
+                Err(e) => {
+                }
+            }
+        },
+        Connection { device_id } => {
+        },
+        Disconnection { device_id } => {
+        }
+    }
+}
 
 fn main() {
     let mut port = serialport::new("/dev/ttyUSB0", 115_200)
@@ -93,6 +113,7 @@ fn main() {
         running_buffer = match parse_command(&running_buffer) {
             Ok((remainder, command)) => {
                 println!("got command {:?}",command);
+                let _ = process_command(command);
                 // match null bytes
                 match tag::<_, _, ()>("\n")(remainder) {
                     Ok((remainder, _)) => {
@@ -106,18 +127,9 @@ fn main() {
                 }
             },
             Err(e) => {
-                //println!("failed to parse with error {}", e);
-
                 let mut serial_buf: Vec<u8> = vec![0; 64];
 
                 let mut end = 64;
-
-                /*for i in 0..64 {
-                    if serial_buf[i] != 0 {
-                        start = i;
-                        break;
-                    }
-                }*/
 
                 if let Ok(_) = port.read(&mut serial_buf) {
                     for i in 0..64 {
